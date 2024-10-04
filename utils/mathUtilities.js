@@ -1,7 +1,7 @@
 /**
- * Gets a random math question
+ * Gets a random multiplication, division, subtraction or addition question
  * 
- * @returns {} The random math question
+ * @returns {} The randomly generated math question
  */
 function getQuestion() {
 
