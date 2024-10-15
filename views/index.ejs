@@ -2,6 +2,13 @@
 <%- include('partials/header') %>
     <main class="main-content index_container">
         <h1>Welcome to the Math Competition App</h1>
+
+        <% if (lastStreak > 0) { %>
+            <p>Your last streak was: <%= lastStreak %></p>
+        <% } else { %>
+            <p>You have no recorded streak.</p>
+        <% } %>
+        
         <div class="navigation__container">
             <a href="/leaderboards">
                 View Leaderboards
