@@ -53,8 +53,10 @@ function getQuestion() {
  * @param {*} answer The potential answer
  * @returns {boolean} True if the answer was correct, false otherwise.
  */
-function isCorrectAnswer(question, answer) {
-  return false;
+function isCorrectAnswer(question, userAnswer) {
+  // The 'question' parameter should be the object returned by getQuestion()
+  const correctAnswer = question.answer;
+  return parseFloat(userAnswer) === correctAnswer;
 }
 
 module.exports = {
