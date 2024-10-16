@@ -18,18 +18,23 @@ let streaks = [];
 // ROUTES |
 //--------|
 
-// index
+// INDEX
 app.get("/", (req, res) => {
   res.render("index", { lastStreak });
 });
 
-// Quiz route
-app.get("/quiz", (req, res) => {
+// QUIZ
+app.get("/quiz", (req, res, next) => {
   currentQuestion = getQuestion();
+  if (!currentQuestion || !currentQuestion.questionText) {
+    // Handle the error directly
+    res.status(500).send("Error generating question. Please try again.");
+    return;
+  }
   res.render("quiz", { question: currentQuestion.questionText });
 });
 
-// Quiz submission
+// QUIZ SUBMISSION
 app.post("/quiz", (req, res) => {
   const { answer } = req.body;
   console.log(`Answer submitted: ${answer}`); // Log the answer for debugging
@@ -46,15 +51,27 @@ app.post("/quiz", (req, res) => {
     res.redirect("/quizEnding");
   }
 });
-
 app.get("/quizEnding", (req, res) => {
   res.render("quizEnding", { lastStreak });
 });
 
+// LEADER BOARDS
 app.get("/leaderboards", (req, res) => {
   // Sort streaks in descending order and takes the top 10
   const topStreaks = streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
   res.render("leaderboards", { topStreaks });
+});
+
+//--------|
+// ERRORS |
+//--------|
+
+// Handle 404 errors (Page Not Found); Just to see how this works
+app.use((req, res, next) => {
+  const err = new Error("Page not found.");
+  err.status = 404;
+  err.type = "not_found";
+  next(err);
 });
 
 // Start the server
