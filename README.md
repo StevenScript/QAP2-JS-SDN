@@ -1,96 +1,170 @@
-# Math Competition App
+# Math Competition App Documentation
 
-This is the starting point for the **Math Competition App** assignment. The goal of this project is to create a simple web application where users can practice solving math questions, track their streak of correct answers, and view leaderboards.
+## Steven Norris
 
-## Features
-- **Home Page**: 
-  - Start a new quiz or view the leaderboards.
-  - Display the user's last recorded streak or a message indicating no streak exists.
-  
-- **Quiz Page**: 
-  - Display math questions for the user to answer.
-  - Track the user's streak of correct answers.
+## 10-15-2024
 
-- **Quiz Completion Page**:
-  - Display the current streak.
-  - Allow the user to start a new quiz or return to the home page.
+Documentation for my **Math Competition App**! This guide is designed to help understand the code and techniques used in this Express.js project.
 
-- **Leaderboards Page**:
-  - Display the top 10 streaks, including the number of correct answers and when the streak was obtained.
+## Table of Contents
 
-## Setup Instructions
+1. [Introduction](#introduction)
+2. [Understanding the Code](#understanding-the-code)
+   - [EJS Templates](#ejs-templates)
+     - [index.ejs](#indexejs)
+     - [quiz.ejs](#quizejs)
+     - [quizEnding.ejs](#quizendingejs)
+     - [leaderboards.ejs](#leaderboardsejs)
+     - [partials/header.ejs](#partialsheaderejs)
+3. [Key Concepts and Techniques](#key-concepts-and-techniques)
+   - [Express.js Basics](#expressjs-basics)
+   - [EJS Templating](#ejs-templating)
+   - [Routing](#routing)
+   - [Handling Form Data](#handling-form-data)
+   - [State Management](#state-management)
+   - [Error Handling](#error-handling)
+4. [Conclusion](#conclusion)
+5. [Additional Resources](#additional-resources)
 
-### Prerequisites
-- [Node.js](https://nodejs.org) installed on your machine.
-- A code editor, such as [VSCode](https://code.visualstudio.com/).
+---
 
-## How to Use this Template
+## Introduction
 
-This repository is set up as a **GitHub template** to help you quickly create your own version of the **Math Competition App**.
+The **Math Competition App** is a simple web application built with **Node.js** and **Express.js**. It presents users with random math questions and tracks their streak of correct answers. Users can:
 
-### Steps to Create Your Own Repository
+- Start a new quiz.
+- Answer math questions (addition, subtraction, multiplication, division).
+- View their current streak.
+- See the top streaks on the leaderboard.
 
-1. **Click the "Use this template" button** at the top of this page on GitHub.
-   
-1. **Name your new repository** and choose its visibility (public or private).
+---
 
-1. Once your repository is created, **clone your new repo** to your local machine:
-    ```bash
-    git clone <your-new-repo-url>
-    ```
+## Understanding the Code
 
-1. Navigate into the project directory and install the necessary dependencies:
-    ```bash
-    cd <your-new-repo-name>
-    npm install
-    ```
-  
-1. **Run the app:**
-    ```bash
-    npm start
-    ```
-    This will start the server at `http://localhost:3000/`.
+## index.js
 
-1. **Run tests:**
-    ```bash
-    npm test
-    ```
-    This will run the unit tests for the application.
+### Imports:
 
-1. You can now begin working on your project, adding your own code and committing your changes as you go:
-    ```bash
-    git add .
-    git commit -m "First commit"
-    git push origin main
-    ```
+- **express**: The Express.js framework.
+- **getQuestion, isCorrectAnswer**: Utility functions from `mathUtilities.js`.
 
-By using this template, you'll have the project structure and initial setup ready to go, so you can focus on building the functionality!
+### Middleware:
 
-## Development Guidelines
+- `app.set("view engine", "ejs")`: Sets EJS as the templating engine.
+- `app.use(express.urlencoded({ extended: true }))`: Parses incoming request bodies with URL-encoded payloads (useful for form data).
+- `app.use(express.static("public"))`: Serves static files from the `public` directory.
 
-1. **Homepage**:
-   - The homepage links should bring you to a new quiz or the leaderboards.
-   - Show the last recorded streak or a message indicating there was no streak.
-   
-2. **Quiz Functionality**:
-   - Implement logic to present math questions.
-   - Check the correctness of user answers and update the streak.
-   
-3. **Leaderboards**:
-   - Track and display the top 10 streaks in memory (no database required).
+### State Variables:
 
-4. **Testing**:
-   - Write unit tests for:
-     - Generating a new math question.
-     - Checking if the user's answer is correct or incorrect.
-   - Make sure tests pass before submitting the assignment.
+- **currentQuestion**: Stores the current math question object.
+- **streak**: Tracks the user's current streak of correct answers.
+- **lastStreak**: Stores the last recorded streak.
+- **streaks**: An array to keep track of all streaks for the leaderboard.
 
-## Submission Guidelines
-- Submit a link to your GitHub repository through the Teams assignment.
-- Ensure all required functionality is implemented and working.
-- The project should run with `npm start` and all tests should pass with `npm test`.
+### Routes:
 
-## Notes
-- Extra npm packages are allowed (except for templating engines like React).
-- All pages should use **.ejs templates**.
-- No persistent data storage is required; all data can be stored in memory.
+- **Home Route (`/`)**:
+
+  - Renders the `index.ejs` template.
+  - Passes `lastStreak` to display the user's last streak.
+
+- **Quiz Route (`/quiz`)**:
+  - Generates a new math question using `getQuestion()`.
+  - Renders the `quiz.ejs` template with the current question.
+- **Quiz Submission (`POST /quiz`)**:
+
+  - Receives the user's answer from the form data.
+  - Uses `isCorrectAnswer()` to check if the answer is correct.
+  - If correct, increments the streak and redirects to `/quiz` for the next question.
+  - If incorrect, updates `lastStreak`, adds the streak to `streaks`, resets `streak`, and redirects to `/quizEnding`.
+
+- **Quiz Ending Route (`/quizEnding`)**:
+
+  - Renders the `quizEnding.ejs` template with the last streak.
+
+- **Leaderboards Route (`/leaderboards`)**:
+
+  - Sorts the `streaks` array to get the top 10 streaks.
+  - Renders the `leaderboards.ejs` template with the top streaks.
+
+- **404 Error Handling**:
+  - Catches all undefined routes and sends a 404 response.
+
+### Starting the Server:
+
+- The app listens on the specified port (3000).
+- Logs a message to the console when the server starts.
+
+## mathUtilities.js
+
+- ### getQuestion():
+- Generates two random numbers between 1 and 10.
+- Randomly selects an operation: addition, subtraction, multiplication, or division.
+- Constructs a question and calculates the correct answer.
+- Ensures division results in whole numbers; if not possible, defaults to addition.
+- Returns an object containing `questionText` and `answer`.
+
+- ### isCorrectAnswer():
+- Takes a question object and the user's answer.
+- Converts the user's answer to a number using `parseFloat`.
+- Compares it to the correct answer.
+- Returns `true` if correct, `false` otherwise.
+
+### EJS Templates
+
+- **index.ejs**: Home page template displaying last streak and links to start a quiz or view leaderboards.
+- **quiz.ejs**: Displays the current math question and form for user input.
+- **quizEnding.ejs**: Shows the user's last streak and options to start a new quiz or return home.
+- **leaderboards.ejs**: Displays the top streaks in a table format.
+- **partials/header.ejs**: Common header for all pages including HTML `<head>`.
+
+---
+
+## Key Concepts and Techniques
+
+### Express.js Basics
+
+- **Express.js** is a minimal and flexible Node.js web application framework.
+- **Setting Up a Server**: Create an instance of Express and define routes using `app.get()` and `app.post()`.
+- **Middleware**: Use `app.use()` to add middleware, such as for parsing form data or serving static files.
+
+### EJS Templating
+
+- **EJS (Embedded JavaScript Templates)** allows you to create HTML pages with embedded JavaScript.
+- **Rendering Templates**: Use `res.render("templateName", data)` to render an EJS template and pass data to it.
+
+### Routing
+
+- **Routes** define the endpoints of your web application, using GET and POST methods.
+
+### Handling Form Data
+
+- Use `express.urlencoded()` middleware to parse URL-encoded form data.
+- Access form inputs via `req.body.inputName`.
+
+### State Management
+
+- Use variables to manage state, such as user streaks.
+
+### Error Handling
+
+- Use `res.status(code).send(message)` for simple error responses.
+- Define a catch-all 404 handler for undefined routes.
+
+---
+
+## Conclusion
+
+Having gone through the entire codebase of the **Math Competition App** I now have a solid understanding of how it works using Express. This application demonstrates the basics of building a web app with Express.js, including routing, templating(EJS), handling form data, and managing application state.
+
+---
+
+## Additional Resources
+
+- **[Express.js Documentation](https://expressjs.com/)**
+- **[EJS Documentation](https://ejs.co/)**
+- **[Node.js Documentation](https://nodejs.org/en/docs/)**
+- **[MDN Web Docs - Express Tutorial](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs)**
+- **[Express.js Middleware Tutorial](https://www.tutorialspoint.com/expressjs/expressjs_middleware.htm)**
+
+---
